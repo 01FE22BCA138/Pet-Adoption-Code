@@ -136,7 +136,7 @@
     <div class="box1">
         <div class="box2">
             <h2 style="text-align: center; margin-top: 10px;">Pet Rescue Request</h2>
-            <form action="/rescue" method="POST">
+            <form action="/rescue" method="POST" onsubmit="showAlert()">
                 Pet Type : <br>
                 <input type="text" name="petTypeR" size="37" pattern="[A-Za-z\s]+" placeholder="e.g. dog/cat/rabbit" required>
                 </select><br>
@@ -154,5 +154,11 @@
             </form>
         </div>
     </div>
+
+    <script>
+        function showAlert() {
+            alert("Request sent successfully");
+        }
+    </script>
 </body>
 </html>

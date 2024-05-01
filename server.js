@@ -49,9 +49,6 @@ const rescueSchema = new mongoose.Schema({
 }, { collection: 'rescue_data' });
 const Rescue = mongoose.model("rescue_data", rescueSchema);
 
-const navbar = () =>
-  "<div><nav><ul><li><a href='/wtp'>Home</a></li><li><a href='/adopt'>Adopt Pet</a></li><li><a href='/rescue'>Rescue Pet</a></li><li><a href='/create'>Sign up</a></li></ul></nav></div>";
-
 const server = http.createServer((req, res) => {
   if (req.url === '/favicon.ico') {
     res.writeHead(204);
@@ -67,83 +64,60 @@ const server = http.createServer((req, res) => {
         serveFormPage(res, "wtp.html");
       } else if (req.method === "POST") {
         collectRequestData(req, (data) => {
-          User.create(data)
-            .then(() => {
-              res.writeHead(302, { Location: "/" });
-              res.end();
-            })
-            .catch((err) => {
-              console.error("Error creating user:", err);
-              res.writeHead(500);
-              res.end("Error creating user");
-            });
-        });
-      }
-      break;
-
-      case "/gallery":
-      if (req.method === "GET") {
-        serveFormPage(res, "gallery.html");
-      }
-      break;
-
-    case "/create":
-      if (req.method === "GET") {
-        serveFormPage(res, "create.html");
-      } else if (req.method === "POST") {
-        collectRequestData(req, (data) => {
-          User.create(data)
-            .then(() => {
-              res.writeHead(302, { Location: "/" });
-              res.end();
-            })
-            .catch((err) => {
-              console.error("Error creating user:", err);
-              res.writeHead(500);
-              res.end("Error creating user");
-            });
-        });
-      }
-      break;
-
-    case "/pets":
-      if (req.method === "GET") {
-        const { query } = url.parse(req.url, true);
-        const queryParams = new URLSearchParams(query);
-        const location = queryParams.get("location");
-        const petType = queryParams.get("petType");
-
-        const queryOptions = {};
-        if (location && location !== "all") {
-          queryOptions.location = location;
-        }
-        if (petType && petType !== "all") {
-          if (petType !== 'other') {
-            queryOptions.type = petType;
-          } else {
-            queryOptions.type = { $in: ['Bird', 'Rabbit', 'Flemish Giant', 'Angora', 'Lionhead', 'Holland Lop'] };
+          if (!data.fname || !data.lname || !data.email || !data.password) {
+            res.writeHead(400);
+            res.end("Missing required fields");
+            return;
           }
-        }
+          const emailRegex = /^\S+@\S+\.\S+$/;
+          if (!emailRegex.test(data.email)) {
+            res.writeHead(400);
+            res.end("Invalid email format");
+            return;
+          }
+          if (data.password.length < 6) {
+            res.writeHead(400);
+            res.end("Password must be at least 6 characters long");
+            return;
+          }
 
-        Pet.find(queryOptions)
-          .then((pet_data) => {
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify(pet_data));
-          })
-          .catch((err) => {
-            console.error("Error fetching pets:", err);
-            res.writeHead(500);
-            res.end("Error fetching pets");
-          });
+          User.create(data)
+            .then(() => {
+              res.writeHead(302, { Location: "/" });
+              res.end();
+            })
+            .catch((err) => {
+              console.error("Error creating user:", err);
+              res.writeHead(500);
+              res.end("Error creating user");
+            });
+        });
       }
       break;
 
     case "/adopt":
-      if (req.method === "GET") {
-        serveFormPage(res, "adopt.html");
-      } else if (req.method === "POST") {
+      if (req.method === "POST") {
         collectRequestData(req, (data) => {
           const { email, password, petId } = data;
+          if (!email || !password || !petId) {
+            res.writeHead(400);
+            res.end("Missing required fields");
+            return;
+          }
+
+          const emailRegex = /^\S+@\S+\.\S+$/;
+          if (!emailRegex.test(email)) {
+            res.writeHead(400);
+            res.end("Invalid email format");
+            return;
+          }
+
+          if (password.length < 6) {
+            res.writeHead(400);
+            res.end("Password must be at least 6 characters long");
+            return;
+          }
+
           User.findOne({ email: email, password: password })
             .then((user) => {
               if (!user) {
@@ -168,7 +142,6 @@ const server = http.createServer((req, res) => {
                     res.writeHead(500);
                     res.end("Error updating pet with adopter");
                   });
-
               }
             })
             .catch((err) => {
@@ -183,6 +156,18 @@ const server = http.createServer((req, res) => {
     case "/rescue":
       if (req.method === "POST") {
         collectRequestData(req, (data) => {
+          if (!data.petType || !data.conditionR || !data.locationR || !data.pinR || !data.phoneR) {
+            res.writeHead(400);
+            res.end("Missing required fields");
+            return;
+          }
+          const phoneRegex = /^\d{10}$/;
+          if (!phoneRegex.test(data.phoneR)) {
+            res.writeHead(400);
+            res.end("Invalid phone number format");
+            return;
+          }
+
           Rescue.create(data)
             .then(() => {
               res.writeHead(302, { Location: "/" });
@@ -196,58 +181,6 @@ const server = http.createServer((req, res) => {
         });
       } else {
         serveFormPage(res, "rescue.html");
-      }
-      break;
-
-    case "/view":
-      if (req.method === "GET") {
-        const { query } = url.parse(req.url, true);
-        const petId = query.petId;
-
-        if (!petId) {
-          res.writeHead(400);
-          res.end("Missing petId parameter");
-          return;
-        }
-
-        Pet.findById(petId)
-          .then((pet_data) => {
-            if (!pet_data) {
-              res.writeHead(404);
-              res.end("Pet not found");
-              return;
-            }
-
-            const viewFilePath = path.join(__dirname, "view.html");
-            fs.readFile(viewFilePath, (err, viewData) => {
-              if (err) {
-                console.error(`Error reading ${viewFilePath}:`, err);
-                res.writeHead(500);
-                res.end("Server Error: Unable to read view page.");
-                return;
-              }
-              res.writeHead(200, { "Content-Type": "text/html" });
-              const modifiedViewContent = viewData.toString()
-                .replace("{{PET_NAME}}", pet_data.petName)
-                .replace("{{PET_BREED}}", pet_data.petBreed)
-                .replace("{{PET_TYPE}}", pet_data.type)
-                .replace("{{PET_APPEARANCE}}", pet_data.appearance)
-                .replace("{{PET_GENDER}}", pet_data.gender)
-                .replace("{{PET_LOCATION}}", pet_data.location)
-                .replace("{{PET_AGE}}", pet_data.age)
-                .replace("{{PET_VACCINATED}}", pet_data.vaccinated)
-                .replace("{{PET_DESEXED}}", pet_data.desexed)
-                .replace("{{PET_WORMED}}", pet_data.wormed)
-                .replace("{{PET_ID}}", pet_data._id)
-                .replace("${pet.image_data}", pet_data.image_data);
-              res.end(modifiedViewContent);
-            });
-          })
-          .catch((err) => {
-            console.error("Error fetching pet details:", err);
-            res.writeHead(500);
-            res.end("Error fetching pet details");
-          });
       }
       break;
 

@@ -40,14 +40,15 @@
     nav a:hover {
        color: #80c2a4;
     }
-    nav li:nth-child(4) a {
+    nav li:nth-child(4) a, nav li:nth-child(5) a {
             color: #80c2a4; 
         }
 
     .box1{
         display: flex;
-        justify-content: center; 
+        justify-content: space-around; 
         align-items: center; 
+        margin-top: 20px;
     }
     input,button{
         margin-bottom: 20px;
@@ -71,17 +72,24 @@
     #gender option{
         width: 165px;
     }
+
+    .box2 {
+        margin: 0 20px;
+    }
   </style>
 </head>
 <body>
     
     <h1>PETSY <img src="pics/paw.png" height="30px" alt=""></h1>
+    
+        
     <nav>
         <ul>
             <li><a href="/">Home</a></li>
             <li><a href="/adopt">Adopt Pet</a></li>   
             <li><a href="/rescue">Rescue Pet</a></li>
             <li><a href="/create">Sign Up</a></li>
+            <li><a href="/login">Log In</a></li>
         </ul>
     </nav>
     <br>
@@ -95,11 +103,20 @@
                 <input type="number" name="pno" placeholder="Enter Phone Number" pattern="[0-9]{10}" title="Phone number must be 10 digits(no spaces or hyphens)" required><br>
                 <input type="number" name="pin" placeholder="Enter Pincode" pattern="[0-9]{6}" title="Pin number must be 6 digits" required>
                 <input type="text" name="city"  placeholder="Enter City Name" pattern="[A-Za-z\s]+" required><br>
-                <input type="email" name="email" placeholder="Enter your Email" size="43px" pattern="[a-z0-9]+@karunya\.edu\.in" title="Should be Kmail" required><br>
+                <input type="email" name="email" placeholder="Enter your Email" size="43px" pattern="[a-z0-9]+@gmail\.com" title="Should be Gmail" required><br>
                 <input type="password" name="password" placeholder="Enter your Password" size="43px" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}" title="Should contain lowercase, uppercase, number, special characters and minimum of 8 characters long" required><br><center>
                 <input type="submit" value="Register" style="background-color: darkcyan; width: 80px; color: aliceblue; margin-bottom: 5px;"></center>
             </form>
-            <div style="text-align: center;">Head over to adopt section to adopt an adorable one :)</div>
+            <div style="text-align: center;">Head over to adopt section to adopt an adorable one </div>
+        </div>
+
+        <div class="box2">
+            <h2 style="text-align: center; margin-top: 7px;">Login</h2>
+            <form id="loginForm" action="/" method="post">
+                <input type="email" name="email" placeholder="Enter your Email" size="43px" pattern="[a-z0-9]+@gmail\.com" title="Should be Gmail" required><br>
+                <input type="password" name="password" placeholder="Enter your Password" size="43px" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*\W).{8,}" title="Should contain lowercase, uppercase, number, special characters and minimum of 8 characters long" required><br><center>
+                <input type="submit" value="Login" style="background-color: darkcyan; width: 80px; color: aliceblue; margin-bottom: 5px;"></center>
+            </form>
         </div>
     </div> 
 </body>

@@ -14,7 +14,7 @@ def store_pet_image(pet_id, image_path):
     db.pet_data.update_one({'petId': pet_id}, {'$set': {'image_data': base64_image}}, upsert=True)
     print(f"Image stored for pet with ID {pet_id}")
 
-folder_path = './'
+folder_path = 'D:\Adoption-pet\Pet-Adoption\datas\pet_pics'
 
 for filename in os.listdir(folder_path):
     if filename.endswith('.jpg') or filename.endswith('.jpeg') or filename.endswith('.png'):
